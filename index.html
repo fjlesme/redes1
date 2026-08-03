@@ -166,7 +166,7 @@
 <script>
 // Pegá acá la URL de tu Google Apps Script publicado (ver instrucciones del README).
 // Mientras diga "PEGAR_URL_AQUI", los resultados NO se envían a ningún lado, solo se muestran en pantalla.
-const SHEET_ENDPOINT = "PEGAR_URL_AQUI";
+const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbwAS6UOQIyQq3ABj5PzF6wgNUGgUZFD0QRkk3ozzFSk_wk8SIOZw_qjqxnPBZd-mSkQTw/exec";
 
 const QUESTIONS = [
   {
@@ -414,7 +414,7 @@ submitBtn.addEventListener('click', () => {
 function sendResultsAnonymously(score, unitScores) {
   const statusEl = document.getElementById('send-status');
 
-  if (!SHEET_ENDPOINT || SHEET_ENDPOINT === "https://script.google.com/macros/s/AKfycbwAS6UOQIyQq3ABj5PzF6wgNUGgUZFD0QRkk3ozzFSk_wk8SIOZw_qjqxnPBZd-mSkQTw/exec") {
+  if (!SHEET_ENDPOINT || SHEET_ENDPOINT === "PEGAR_URL_AQUI") {
     statusEl.textContent = "";
     return;
   }
