@@ -4,7 +4,7 @@ Test interactivo de opción múltiple para evaluar el nivel de conocimiento prev
 
 ## Ver el test en vivo
 
-👉 **[https://fjlesme.github.io/redes1/](https://fjlesme.github.io/redes-1/)**
+👉 **[https://fjlesme.github.io/redes1/](https://fjlesme.github.io/redes1/)**
 
 
 ## ¿Qué contiene?
