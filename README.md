@@ -6,7 +6,6 @@ Test interactivo de opción múltiple para evaluar el nivel de conocimiento prev
 
 👉 **[https://fjlesme.github.io/redes1/](https://fjlesme.github.io/redes1/)**
 
-
 ## ¿Qué contiene?
 
 - 15 preguntas de opción múltiple, distribuidas en las 7 unidades del programa:
@@ -29,13 +28,39 @@ No requiere instalación ni servidor. Es un único archivo HTML autocontenido:
 2. Cada alumno responde las 15 preguntas desde su navegador (celular, tablet o computadora).
 3. Al finalizar, ve su propio resultado en pantalla.
 
-> ⚠️ Actualmente los resultados **no se guardan** en ningún lado — cada alumno solo ve su propio puntaje al finalizar. Si más adelante se necesita recopilar los resultados de todos los alumnos en un solo lugar, hay que agregar un sistema de almacenamiento (por ejemplo, una hoja de cálculo conectada o una base de datos simple).
+Los resultados se envían de forma **totalmente anónima** a una hoja de Google configurada por el docente — no se pide ni se guarda nombre, email, ni ningún dato identificable de los alumnos. Solo se guarda: fecha/hora, puntaje total y aciertos por unidad.
+
+## Cómo configurar la recolección de resultados (Google Sheets)
+
+Este paso se hace **una sola vez**, antes de compartir el link con los alumnos.
+
+1. Creá una hoja de cálculo nueva en [sheets.new](https://sheets.new).
+2. Andá a **Extensiones → Apps Script**.
+3. Borrá el contenido de ejemplo y pegá el contenido del archivo [`apps_script.gs`](./apps_script.gs) de este repo.
+4. Guardá el proyecto.
+5. Arriba a la derecha: **Implementar → Nueva implementación**.
+6. Tipo: **Aplicación web**.
+7. "Ejecutar como": **Yo** (tu cuenta).
+8. "Quién tiene acceso": **Cualquier usuario**.
+9. **Implementar** → autorizá los permisos con tu cuenta de Google (te va a pedir confirmar accesos, es normal, es tu propio script).
+10. Copiá la URL que te da ("URL de la aplicación web"), termina en `/exec`.
+11. Abrí el archivo `index.html`, buscá la línea:
+    ```js
+    const SHEET_ENDPOINT = "PEGAR_URL_AQUI";
+    ```
+    y reemplazá `"PEGAR_URL_AQUI"` por la URL que copiaste.
+12. Subí el `index.html` actualizado a tu repositorio de GitHub (reemplazando el anterior).
+
+A partir de ese momento, cada vez que un alumno termine el test, se agrega una fila nueva en tu hoja de cálculo con su resultado, de forma anónima.
+
+> ⚠️ Mientras `SHEET_ENDPOINT` diga `"PEGAR_URL_AQUI"`, el test funciona con normalidad pero **no envía nada a ningún lado** — los resultados solo se muestran en pantalla al alumno.
 
 ## Estructura del repositorio
 
 ```
-├── index.html   # Test diagnóstico completo (HTML + CSS + JS en un solo archivo)
-└── README.md    # Este archivo
+├── index.html      # Test diagnóstico completo (HTML + CSS + JS en un solo archivo)
+├── apps_script.gs  # Código para pegar en Google Apps Script (recibe los resultados)
+└── README.md       # Este archivo
 ```
 
 ## Tecnología
