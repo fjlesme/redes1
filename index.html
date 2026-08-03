@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Diagnóstico – Redes de Computadoras</title>
+<style>
+  :root{
+    --ink:#1c2b2d;
+    --paper:#f6f3ec;
+    --line:#d8cfc0;
+    --signal:#2f6f5e;
+    --signal-dim:#e4efe9;
+    --warn:#a4432f;
+    --warn-dim:#f6e5e0;
+    --muted:#6f6a5e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Georgia','Iowan Old Style',serif;
+    line-height:1.5;
+    padding:0 0 80px;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:40px 24px;}
+  header{border-bottom:3px solid var(--ink);padding-bottom:20px;margin-bottom:32px;}
+  .eyebrow{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:12px;
+    color:var(--signal);
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  h1{font-size:32px;margin:0 0 10px;letter-spacing:-0.01em;}
+  .sub{color:var(--muted);font-size:15px;font-family:'Helvetica Neue',Arial,sans-serif;}
+
+  #progress-bar{
+    position:sticky;top:0;background:var(--paper);padding:14px 0 10px;z-index:5;
+    border-bottom:1px solid var(--line);
+  }
+  .progress-track{height:6px;background:var(--line);border-radius:3px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--signal);width:0%;transition:width .3s ease;}
+  .progress-label{
+    font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;color:var(--muted);
+    margin-top:6px;letter-spacing:.04em;
+  }
+
+  .q{
+    border-bottom:1px solid var(--line);
+    padding:28px 0;
+  }
+  .q:first-of-type{padding-top:32px;}
+  .q-unit{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:11px;text-transform:uppercase;letter-spacing:.12em;
+    color:var(--signal);font-weight:700;margin-bottom:6px;
+  }
+  .q-title{font-size:19px;margin:0 0 16px;}
+  .options{display:flex;flex-direction:column;gap:10px;}
+  .opt{
+    display:flex;align-items:flex-start;gap:12px;
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    padding:12px 14px;
+    cursor:pointer;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:15px;
+    background:#fff;
+    transition:border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:var(--signal);}
+  .opt input{margin-top:3px;accent-color:var(--signal);flex-shrink:0;}
+  .opt.selected{border-color:var(--signal);background:var(--signal-dim);}
+  .opt.correct{border-color:var(--signal);background:var(--signal-dim);}
+  .opt.incorrect{border-color:var(--warn);background:var(--warn-dim);}
+
+  #submit-btn, #retry-btn{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-weight:700;
+    font-size:15px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:8px;
+    padding:16px 28px;
+    cursor:pointer;
+    width:100%;
+    margin-top:24px;
+    letter-spacing:.02em;
+  }
+  #submit-btn:hover, #retry-btn:hover{background:var(--signal);}
+  #submit-btn:disabled{background:var(--line);color:var(--muted);cursor:not-allowed;}
+
+  #results{display:none;}
+  .score-hero{
+    text-align:center;
+    padding:36px 20px;
+    border:3px solid var(--ink);
+    border-radius:12px;
+    margin-bottom:28px;
+    background:#fff;
+  }
+  .score-num{font-size:56px;font-weight:700;line-height:1;}
+  .score-level{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    text-transform:uppercase;letter-spacing:.1em;font-size:13px;
+    color:var(--signal);font-weight:700;margin-top:10px;
+  }
+  .score-desc{font-family:'Helvetica Neue',Arial,sans-serif;color:var(--muted);font-size:14px;margin-top:8px;}
+
+  .breakdown{font-family:'Helvetica Neue',Arial,sans-serif;font-size:14px;}
+  .breakdown h3{font-family:Georgia,serif;font-size:17px;margin:0 0 14px;}
+  .bd-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .bd-label{flex:0 0 150px;font-size:13px;color:var(--muted);}
+  .bd-track{flex:1;height:8px;background:var(--line);border-radius:4px;overflow:hidden;}
+  .bd-fill{height:100%;background:var(--signal);}
+  .bd-score{flex:0 0 34px;text-align:right;font-size:13px;font-weight:700;}
+
+  #quiz-form{display:block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Fundamentos de Redes · Nivel de entrada</div>
+    <h1>Test Diagnóstico de Redes</h1>
+    <div class="sub">15 preguntas de opción múltiple. Elegí la respuesta que consideres correcta en cada una — no hay penalización por intentarlo, esto es solo para conocer tu punto de partida.</div>
+  </header>
+
+  <div id="progress-bar">
+    <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label" id="progress-label">0 de 15 respondidas</div>
+  </div>
+
+  <form id="quiz-form"></form>
+  <button id="submit-btn" disabled>Responder para continuar</button>
+
+  <div id="results">
+    <div class="score-hero">
+      <div class="score-num" id="score-num">0/15</div>
+      <div class="score-level" id="score-level"></div>
+      <div class="score-desc" id="score-desc"></div>
+    </div>
+    <div class="breakdown">
+      <h3>Resultado por unidad</h3>
+      <div id="breakdown-rows"></div>
+    </div>
+    <button id="retry-btn">Volver a intentar</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    unit: "Unidad 01 · Concepto de Redes",
+    q: "¿Cuál es el objetivo principal de una red de computadoras?",
+    options: [
+      "Permitir que varios dispositivos compartan recursos e información entre sí",
+      "Aumentar la velocidad del procesador de una computadora",
+      "Reemplazar la necesidad de tener un sistema operativo",
+      "Evitar que las computadoras se conecten a internet"
+    ],
+    correct: 0
+  },
+  {
+    unit: "Unidad 01 · Concepto de Redes",
+    q: "¿Cuál de las siguientes es un ejemplo de hardware de red?",
+    options: [
+      "Un procesador de texto",
+      "Un switch",
+      "Un sistema operativo",
+      "Una hoja de cálculo"
+    ],
+    correct: 1
+  },
+  {
+    unit: "Unidad 02 · Tipos de Redes",
+    q: "¿Qué tipo de red cubre un área geográfica pequeña, como una oficina o un hogar?",
+    options: ["WAN", "MAN", "LAN", "Internet"],
+    correct: 2
+  },
+  {
+    unit: "Unidad 02 · Tipos de Redes",
+    q: "¿Qué es una topología de red?",
+    options: [
+      "La marca del cableado utilizado",
+      "La forma en que están organizados y conectados los dispositivos de una red",
+      "El nombre que se le da a un router",
+      "La velocidad máxima de internet contratada"
+    ],
+    correct: 1
+  },
+  {
+    unit: "Unidad 02 · Modelo OSI / TCP-IP",
+    q: "¿Qué es el modelo OSI?",
+    options: [
+      "Un tipo de cable de red",
+      "Un modelo de referencia que divide la comunicación de red en capas",
+      "Un antivirus para redes",
+      "Un protocolo exclusivo de redes inalámbricas"
+    ],
+    correct: 1
+  },
+  {
+    unit: "Unidad 02 · Modelo OSI / TCP-IP",
+    q: "¿Para qué sirve el protocolo TCP/IP?",
+    options: [
+      "Para asignar direcciones IP y gestionar la comunicación entre dispositivos en una red",
+      "Para diseñar la topología física de una red",
+      "Para cifrar contraseñas de usuarios",
+      "Para fabricar cables de red"
+    ],
+    correct: 0
+  },
+  {
+    unit: "Unidad 02 · DHCP",
+    q: "¿Qué función cumple el servicio DHCP en una red?",
+    options: [
+      "Asigna automáticamente direcciones IP a los dispositivos",
+      "Bloquea el acceso a sitios web",
+      "Convierte nombres de dominio en direcciones IP",
+      "Aumenta la velocidad del WiFi"
+    ],
+    correct: 0
+  },
+  {
+    unit: "Unidad 03 · Dispositivos de Redes",
+    q: "¿Cuál es la función principal de un switch en una red?",
+    options: [
+      "Conectar la red local a internet",
+      "Interconectar dispositivos dentro de una misma red local",
+      "Generar señal WiFi exclusivamente",
+      "Almacenar copias de seguridad de archivos"
+    ],
+    correct: 1
+  },
+  {
+    unit: "Unidad 03 · Dispositivos de Redes",
+    q: "¿Qué diferencia principal hay entre un router y un switch?",
+    options: [
+      "No hay ninguna diferencia, son el mismo dispositivo",
+      "El router conecta redes distintas (por ejemplo, la red local con internet); el switch conecta dispositivos dentro de la misma red",
+      "El switch siempre es inalámbrico y el router siempre es cableado",
+      "El router solo sirve para impresoras"
+    ],
+    correct: 1
+  },
+  {
+    unit: "Unidad 04 · Redes Cableadas",
+    q: "¿Qué tipo de cable es el más utilizado comúnmente en redes cableadas domésticas y de oficina?",
+    options: ["Cable coaxial", "Fibra óptica", "Cable de par trenzado (UTP)", "Cable HDMI"],
+    correct: 2
+  },
+  {
+    unit: "Unidad 04 · Redes Cableadas",
+    q: "¿Para qué se utiliza un conector RJ45?",
+    options: [
+      "Para conectar cables telefónicos analógicos",
+      "Para terminar y conectar cables de red Ethernet",
+      "Para conectar cables de fibra óptica",
+      "Para cargar dispositivos móviles"
+    ],
+    correct: 1
+  },
+  {
+    unit: "Unidad 05 · Estructura y Diseño de Redes",
+    q: "¿Qué es Power Over Ethernet (PoE)?",
+    options: [
+      "Una tecnología que permite alimentar eléctricamente dispositivos a través del mismo cable de red",
+      "Un protocolo de seguridad WiFi",
+      "Un tipo de topología de red",
+      "Un software para diseñar planos de redes"
+    ],
+    correct: 0
+  },
+  {
+    unit: "Unidad 06 · Redes Inalámbricas",
+    q: "¿Qué estándar es comúnmente asociado a las redes inalámbricas WiFi?",
+    options: ["RJ45", "802.11", "TCP/UDP", "USB 3.0"],
+    correct: 1
+  },
+  {
+    unit: "Unidad 06 · Redes Inalámbricas",
+    q: "¿Qué dispositivo permite ampliar la cobertura de una señal WiFi en una zona con poca señal?",
+    options: ["Un repetidor de señal", "Un switch", "Un cable UTP", "Un conector RJ45"],
+    correct: 0
+  },
+  {
+    unit: "Unidad 07 · Seguridad en Redes",
+    q: "¿Cuál de las siguientes es una medida para aumentar la seguridad de una red WiFi?",
+    options: [
+      "Dejar la red sin contraseña para que cualquiera se conecte",
+      "Ocultar el SSID y usar autenticación segura",
+      "Compartir la contraseña públicamente",
+      "Desactivar todas las actualizaciones del router"
+    ],
+    correct: 1
+  }
+];
+
+const LEVELS = [
+  {min:0, max:5, label:"Nivel inicial", desc:"Aún no manejás los conceptos básicos de redes. Es un buen punto de partida para empezar desde cero."},
+  {min:6, max:10, label:"Nivel básico", desc:"Ya conocés algunos conceptos generales. Con el curso vas a reforzar y ordenar esa base."},
+  {min:11, max:15, label:"Nivel intermedio / avanzado", desc:"Tenés una buena base previa sobre redes. El curso te va a permitir profundizar y formalizar esos conocimientos."}
+];
+
+const form = document.getElementById('quiz-form');
+const submitBtn = document.getElementById('submit-btn');
+const progressFill = document.getElementById('progress-fill');
+const progressLabel = document.getElementById('progress-label');
+const answers = new Array(QUESTIONS.length).fill(null);
+
+function render() {
+  form.innerHTML = '';
+  QUESTIONS.forEach((item, qi) => {
+    const qDiv = document.createElement('div');
+    qDiv.className = 'q';
+    qDiv.innerHTML = `
+      <div class="q-unit">${item.unit}</div>
+      <p class="q-title">${qi + 1}. ${item.q}</p>
+      <div class="options" data-qi="${qi}">
+        ${item.options.map((opt, oi) => `
+          <label class="opt" data-oi="${oi}">
+            <input type="radio" name="q${qi}" value="${oi}">
+            <span>${opt}</span>
+          </label>
+        `).join('')}
+      </div>
+    `;
+    form.appendChild(qDiv);
+  });
+
+  form.querySelectorAll('.opt').forEach(label => {
+    label.addEventListener('click', () => {
+      const qi = parseInt(label.parentElement.dataset.qi);
+      const oi = parseInt(label.dataset.oi);
+      answers[qi] = oi;
+      label.parentElement.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+      label.classList.add('selected');
+      updateProgress();
+    });
+  });
+}
+
+function updateProgress() {
+  const answered = answers.filter(a => a !== null).length;
+  progressFill.style.width = (answered / QUESTIONS.length * 100) + '%';
+  progressLabel.textContent = `${answered} de ${QUESTIONS.length} respondidas`;
+  submitBtn.disabled = answered !== QUESTIONS.length;
+  submitBtn.textContent = answered === QUESTIONS.length ? 'Ver mi resultado' : 'Responder para continuar';
+}
+
+submitBtn.addEventListener('click', () => {
+  // reveal correctness on each question
+  form.querySelectorAll('.q').forEach((qDiv, qi) => {
+    const correct = QUESTIONS[qi].correct;
+    qDiv.querySelectorAll('.opt').forEach((opt, oi) => {
+      opt.querySelector('input').disabled = true;
+      if (oi === correct) opt.classList.add('correct');
+      else if (oi === answers[qi]) opt.classList.add('incorrect');
+    });
+  });
+
+  let score = 0;
+  const unitScores = {};
+  QUESTIONS.forEach((item, qi) => {
+    if (!unitScores[item.unit]) unitScores[item.unit] = {correct:0, total:0};
+    unitScores[item.unit].total++;
+    if (answers[qi] === item.correct) {
+      score++;
+      unitScores[item.unit].correct++;
+    }
+  });
+
+  document.getElementById('score-num').textContent = `${score}/${QUESTIONS.length}`;
+  const level = LEVELS.find(l => score >= l.min && score <= l.max);
+  document.getElementById('score-level').textContent = level.label;
+  document.getElementById('score-desc').textContent = level.desc;
+
+  const bdRows = document.getElementById('breakdown-rows');
+  bdRows.innerHTML = Object.entries(unitScores).map(([unit, s]) => `
+    <div class="bd-row">
+      <div class="bd-label">${unit.split(' · ')[0]}</div>
+      <div class="bd-track"><div class="bd-fill" style="width:${(s.correct/s.total*100)}%"></div></div>
+      <div class="bd-score">${s.correct}/${s.total}</div>
+    </div>
+  `).join('');
+
+  submitBtn.style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+  window.scrollTo({top: document.getElementById('results').offsetTop - 20, behavior: 'smooth'});
+});
+
+document.getElementById('retry-btn').addEventListener('click', () => {
+  answers.fill(null);
+  document.getElementById('results').style.display = 'none';
+  submitBtn.style.display = 'block';
+  render();
+  updateProgress();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+render();
+updateProgress();
+</script>
+</body>
+</html>
