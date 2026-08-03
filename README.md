@@ -4,9 +4,8 @@ Test interactivo de opción múltiple para evaluar el nivel de conocimiento prev
 
 ## Ver el test en vivo
 
-👉 **[https://fjlesme.github.io/redes-diagnostico/](https://fjlesme.github.io/redes-diagnostico/)**
+👉 **[https://fjlesme.github.io/redes1/](https://fjlesme.github.io/redes-1/)**
 
-*(reemplazá `redes-diagnostico` por el nombre real del repositorio si usaste otro)*
 
 ## ¿Qué contiene?
 
