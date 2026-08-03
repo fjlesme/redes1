@@ -20,21 +20,32 @@
  * y aciertos por unidad.
  */
 
+// Encabezados fijos: se usan siempre, sin importar qué datos llegaron primero.
+// Esto evita que la hoja se quede con menos columnas de las que corresponde.
+const HEADERS = [
+  "timestamp",
+  "score_total",
+  "total_preguntas",
+  "unidad_01_correctas", "unidad_01_total",
+  "unidad_02_correctas", "unidad_02_total",
+  "unidad_03_correctas", "unidad_03_total",
+  "unidad_04_correctas", "unidad_04_total",
+  "unidad_05_correctas", "unidad_05_total",
+  "unidad_06_correctas", "unidad_06_total",
+  "unidad_07_correctas", "unidad_07_total"
+];
+
 function doPost(e) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
 
   const data = JSON.parse(e.postData.contents);
 
-  // Si es la primera respuesta, escribe los encabezados
+  // Si la hoja está vacía, escribe los encabezados fijos
   if (sheet.getLastRow() === 0) {
-    const headers = Object.keys(data);
-    sheet.appendRow(headers);
+    sheet.appendRow(HEADERS);
   }
 
-  // Asegura que las columnas coincidan con los encabezados existentes
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  const row = headers.map(h => (data[h] !== undefined ? data[h] : ""));
-
+  const row = HEADERS.map(h => (data[h] !== undefined ? data[h] : ""));
   sheet.appendRow(row);
 
   return ContentService
