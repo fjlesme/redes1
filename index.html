@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Test Diagnóstico – Redes de Computadoras 1 </title>
+<title>Test Diagnóstico – Redes de Computadoras 1</title>
 <style>
   :root{
     --ink:#1c2b2d;
@@ -121,6 +121,15 @@
   .bd-score{flex:0 0 34px;text-align:right;font-size:13px;font-weight:700;}
 
   #quiz-form{display:block;}
+
+  .send-status{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:13px;
+    color:var(--muted);
+    text-align:center;
+    margin-top:14px;
+  }
+  .send-status.ok{color:var(--signal);}
 </style>
 </head>
 <body>
@@ -128,7 +137,7 @@
   <header>
     <div class="eyebrow">Fundamentos de Redes · Nivel de entrada</div>
     <h1>Test Diagnóstico de Redes</h1>
-    <div class="sub">15 preguntas de opción múltiple. Elegí la respuesta que consideres correcta en cada una — no hay penalización por intentarlo, esto es solo para conocer tu punto de partida.</div>
+    <div class="sub">15 preguntas de opción múltiple. Elegí la respuesta que consideres correcta en cada una — no hay penalización por intentarlo, esto es solo para conocer tu punto de partida. Tu resultado es completamente anónimo.</div>
   </header>
 
   <div id="progress-bar">
@@ -149,11 +158,16 @@
       <h3>Resultado por unidad</h3>
       <div id="breakdown-rows"></div>
     </div>
+    <div class="send-status" id="send-status"></div>
     <button id="retry-btn">Volver a intentar</button>
   </div>
 </div>
 
 <script>
+// Pegá acá la URL de tu Google Apps Script publicado (ver instrucciones del README).
+// Mientras diga "PEGAR_URL_AQUI", los resultados NO se envían a ningún lado, solo se muestran en pantalla.
+const SHEET_ENDPOINT = "PEGAR_URL_AQUI";
+
 const QUESTIONS = [
   {
     unit: "Unidad 01 · Concepto de Redes",
@@ -393,7 +407,47 @@ submitBtn.addEventListener('click', () => {
   submitBtn.style.display = 'none';
   document.getElementById('results').style.display = 'block';
   window.scrollTo({top: document.getElementById('results').offsetTop - 20, behavior: 'smooth'});
+
+  sendResultsAnonymously(score, unitScores);
 });
+
+function sendResultsAnonymously(score, unitScores) {
+  const statusEl = document.getElementById('send-status');
+
+  if (!SHEET_ENDPOINT || SHEET_ENDPOINT === "https://script.google.com/macros/s/AKfycbwAS6UOQIyQq3ABj5PzF6wgNUGgUZFD0QRkk3ozzFSk_wk8SIOZw_qjqxnPBZd-mSkQTw/exec") {
+    statusEl.textContent = "";
+    return;
+  }
+
+  const payload = {
+    timestamp: new Date().toISOString(),
+    score_total: score,
+    total_preguntas: QUESTIONS.length
+  };
+  // Agrega el puntaje de cada unidad como columnas separadas (ej. unidad_01_correctas)
+  Object.entries(unitScores).forEach(([unit, s], i) => {
+    const key = "unidad_" + String(i + 1).padStart(2, "0");
+    payload[key + "_correctas"] = s.correct;
+    payload[key + "_total"] = s.total;
+  });
+
+  statusEl.textContent = "Enviando resultado de forma anónima...";
+  statusEl.classList.remove('ok');
+
+  fetch(SHEET_ENDPOINT, {
+    method: "POST",
+    mode: "no-cors", // Apps Script no responde con headers CORS; no-cors permite el envío igual
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(payload)
+  })
+  .then(() => {
+    statusEl.textContent = "Resultado enviado de forma anónima. ¡Gracias por completar el test!";
+    statusEl.classList.add('ok');
+  })
+  .catch(() => {
+    statusEl.textContent = "No se pudo enviar el resultado (revisá tu conexión). Tu puntaje igual se muestra arriba.";
+  });
+}
 
 document.getElementById('retry-btn').addEventListener('click', () => {
   answers.fill(null);
